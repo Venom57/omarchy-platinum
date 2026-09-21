@@ -14,7 +14,7 @@ everything, zero animation, and Chicago on the menu bar.
 ## Install
 
 ```bash
-git clone https://github.com/<you>/omarchy-platinum
+git clone https://github.com/Venom57/omarchy-platinum
 cd omarchy-platinum
 ./install.sh
 ```
