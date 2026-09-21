@@ -55,13 +55,15 @@ if [[ -d $DEST/.git ]]; then
 fi
 
 # ------------------------------------------------------------------ fonts
-# ChicagoFLF is public domain (statement from the designer ships with it).
-# Chicago Kare is MIT. Both are fetched from the same upstreams the AUR
-# packages use, and the zip is checksummed against that PKGBUILD.
+# ChicagoFLF is public domain (the designer's statement ships with it) and
+# is fetched from the same upstream the ttf-chicagoflf AUR package uses,
+# checksummed against that PKGBUILD.
+#
+# Chicago Kare, the bitmap reproduction, is deliberately NOT used: it has no
+# hinting tables, so it only renders cleanly at exact integer pixel sizes
+# and goes mushy on any fractionally-scaled display.
 FLF_URL="https://fontlibrary.org/assets/downloads/chicagoflf/a2e4a3d14e40fa7076a0a1bc06f3de43/chicagoflf.zip"
 FLF_SHA="a5c1ff8aeb06505c77e6286fb63b6350494a9b030b688c212322d331d9d2278f"
-KARE_REPO="https://github.com/KingDuane/Chicago-Kare.git"
-KARE_COMMIT="bc29a39aec9768acec001ebfd9aec83fc769aaae"
 
 if (( WITH_FONTS )); then
   mkdir -p "$FONTS"
@@ -85,20 +87,6 @@ if (( WITH_FONTS )); then
     fi
   fi
 
-  if [[ -f $FONTS/ChicagoKare-Regular.ttf ]]; then
-    say "Chicago Kare already installed"
-  else
-    say "Fetching Chicago Kare (MIT)"
-    tmp2=$(mktemp -d)
-    if git clone -q --filter=blob:none "$KARE_REPO" "$tmp2/kare" 2>/dev/null \
-       && git -C "$tmp2/kare" checkout -q "$KARE_COMMIT" 2>/dev/null; then
-      install -Dm644 "$tmp2/kare/ChicagoKare-Regular.ttf" "$FONTS/ChicagoKare-Regular.ttf"
-      [[ -f $tmp2/kare/LICENSE ]] && cp "$tmp2/kare/LICENSE" "$FONTS/LICENSE.ChicagoKare"
-    else
-      warn "Could not fetch Chicago Kare; the bar will keep the system mono font."
-    fi
-    rm -rf "$tmp2"
-  fi
   fc-cache -f "$FONTS" >/dev/null 2>&1 || true
 fi
 

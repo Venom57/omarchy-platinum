@@ -38,7 +38,7 @@ THEME_DIR="$HOME/.config/omarchy/themes/platinum"
 GTK3="$HOME/.config/gtk-3.0"
 GTK4="$HOME/.config/gtk-4.0"
 
-BAR_FONT='"Chicago Kare"'   # bitmap cut: the bar is all 12px, where it is exact
+BAR_FONT='"ChicagoFLF"'     # hinted outline cut; stays crisp at any scale
 GTK_FONT="ChicagoFLF 12"
 
 # Style.font.family is the fontconfig `monospace` alias that

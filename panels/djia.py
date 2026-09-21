@@ -54,15 +54,13 @@ UP = (0.082, 0.486, 0.055)  # classic Mac green
 DOWN = (0.733, 0.031, 0.024)  # classic Mac red
 ACCENT = (0.235, 0.353, 0.549)  # Platinum blue
 
-# Chicago in two cuts. The bitmap reproduction is pixel-exact at 12px and
-# only at 12px, so it draws the UI text; the outline cut draws anything
-# larger, where scaling a bitmap would fall apart.
-#
-# Chicago Kare's charset is period-accurate, which means it stops at the
-# characters a 1997 Mac had: no U+2212 minus, no U+2013 en dash. Keep every
-# string drawn in FONT_UI to ASCII plus U+2026, or it silently draws blank.
-FONT_UI = "Chicago Kare"
-FONT_BIG = "ChicagoFLF"
+# ChicagoFLF throughout. The obvious alternative, Chicago Kare, traces the
+# original *bitmap* Chicago -- its outlines are pixel staircases with no
+# hinting tables (no cvt/fpgm/prep), so it only lands cleanly when one font
+# pixel maps to one screen pixel. On any fractionally-scaled display that
+# never happens, and it renders mushy at every size. ChicagoFLF is a hinted
+# outline design and stays crisp.
+FONT = "ChicagoFLF"
 
 W, H = 340, 376
 TITLEBAR_H = 20
@@ -185,15 +183,16 @@ def bevel(cr, x, y, w, h, raised=True, fill=FACE):
     vline(cr, x + w - 2, y + 1, y + h - 1, br)
 
 
-def set_font(cr, family, size, bitmap=False):
-    """Bitmap Chicago must not be antialiased -- smoothing a font that was
-    designed as literal pixels is what makes most 'retro' UIs look wrong."""
+def set_font(cr, family, size):
+    """Full hinting, grey antialiasing. ChicagoFLF ships real hinting
+    instructions, so letting freetype snap stems to the pixel grid is what
+    keeps it sharp at small sizes rather than blurring it."""
     cr.select_font_face(family)
     cr.set_font_size(size)
     opts = cr.get_font_options()
     import cairo
 
-    opts.set_antialias(cairo.ANTIALIAS_NONE if bitmap else cairo.ANTIALIAS_GRAY)
+    opts.set_antialias(cairo.ANTIALIAS_GRAY)
     opts.set_hint_style(cairo.HINT_STYLE_FULL)
     cr.set_font_options(opts)
 
@@ -218,7 +217,7 @@ def text_w(cr, s):
 def group_box(cr, x, y, w, h, label):
     """An etched frame whose top edge breaks to let the label sit in the
     gap -- the standard grouping device in a Mac OS 8 control panel."""
-    set_font(cr, FONT_UI, 12, bitmap=True)
+    set_font(cr, FONT, 12)
     lw = text_w(cr, label)
     notch_x = x + 10
     notch_w = lw + 8
@@ -263,7 +262,7 @@ def title_bar(cr, w, title, active=True):
         for yy in range(3, TITLEBAR_H - 3, 2):
             hline(cr, 1, w - 2, yy, STRIPE)
 
-    set_font(cr, FONT_UI, 12, bitmap=True)
+    set_font(cr, FONT, 12)
     tw = text_w(cr, title)
     plate_w = tw + 16
     plate_x = (w - plate_w) / 2
@@ -363,7 +362,7 @@ class Panel(Gtk.DrawingArea):
         group_box(cr, x, y, w, h, "Dow Jones Industrial Average")
 
         if self.error is not None:
-            set_font(cr, FONT_UI, 12, bitmap=True)
+            set_font(cr, FONT, 12)
             text(cr, "Could not reach Yahoo Finance.", x + w / 2, y + 52,
                  DOWN, align="center")
             msg = str(self.error)
@@ -375,22 +374,22 @@ class Panel(Gtk.DrawingArea):
             return y + h
 
         if self.quote is None:
-            set_font(cr, FONT_UI, 12, bitmap=True)
+            set_font(cr, FONT, 12)
             text(cr, "Checking…", x + w / 2, y + 70, DIM, align="center")
             return y + h
 
         q = self.quote
 
         # The price, in the outline cut so it can be large and still clean.
-        set_font(cr, FONT_BIG, 34)
+        set_font(cr, FONT, 34)
         text(cr, fmt(q.price), x + w / 2, y + 48, BLACK, align="center")
 
         # Change, with the classic solid triangle rather than an arrow glyph.
         ch, pct = q.change, q.change_pct
         if ch is not None:
             color = UP if ch >= 0 else DOWN
-            set_font(cr, FONT_UI, 12, bitmap=True)
-            sign = "+" if ch >= 0 else "-"
+            set_font(cr, FONT, 12)
+            sign = "+" if ch >= 0 else "−"
             label = f"{sign}{fmt(abs(ch))}   ({pct:+.2f}%)"
             tw = text_w(cr, label)
             tri_w = 9
@@ -424,7 +423,7 @@ class Panel(Gtk.DrawingArea):
         q = self.quote
         pts = q.series if q else []
         if len(pts) < 2:
-            set_font(cr, FONT_UI, 12, bitmap=True)
+            set_font(cr, FONT, 12)
             text(cr, "No intraday data", x + w / 2, y + h / 2 + 4, DIM,
                  align="center")
             return
@@ -471,7 +470,7 @@ class Panel(Gtk.DrawingArea):
         h = 92
         group_box(cr, x, y, w, h, "Session")
         q = self.quote
-        set_font(cr, FONT_UI, 12, bitmap=True)
+        set_font(cr, FONT, 12)
 
         rows = [
             ("Previous close", q.prev if q else None),
@@ -487,7 +486,7 @@ class Panel(Gtk.DrawingArea):
 
         text(cr, "52-week range", x + 14, ry, BLACK)
         if q and q.wk_low is not None and q.wk_high is not None:
-            rng = f"{fmt(q.wk_low, 0)} - {fmt(q.wk_high, 0)}"
+            rng = f"{fmt(q.wk_low, 0)} – {fmt(q.wk_high, 0)}"
         else:
             rng = "--"
         text(cr, rng, x + w - 14, ry, BLACK, align="right")
@@ -496,7 +495,7 @@ class Panel(Gtk.DrawingArea):
     def draw_interval_group(self, cr, x, y, w):
         h = 42
         group_box(cr, x, y, w, h, "Check Every")
-        set_font(cr, FONT_UI, 12, bitmap=True)
+        set_font(cr, FONT, 12)
 
         cx = x + 14
         for i, (label, _) in enumerate(REFRESH_CHOICES):
@@ -529,7 +528,7 @@ class Panel(Gtk.DrawingArea):
             cr.fill()
 
     def draw_footer(self, cr, x, y, w):
-        set_font(cr, FONT_UI, 12, bitmap=True)
+        set_font(cr, FONT, 12)
         if self.loading:
             stamp = "Checking…"
         elif self.quote is not None:
@@ -545,7 +544,7 @@ class Panel(Gtk.DrawingArea):
         self.hits["refresh"] = ("refresh", bx, by, bw, bh)
         bevel(cr, bx, by, bw, bh, raised=not down,
               fill=FACE_DK if down else FACE)
-        set_font(cr, FONT_UI, 12, bitmap=True)
+        set_font(cr, FONT, 12)
         text(cr, "Refresh", bx + bw / 2, by + 15, BLACK, align="center")
 
 

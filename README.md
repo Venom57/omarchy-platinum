@@ -73,19 +73,20 @@ which Omarchy's bar exposes no token for.
 Installed to `~/.local/share/fonts/chicago/`, no root required:
 
 - **ChicagoFLF** — public domain, from [Font Library](https://fontlibrary.org/en/font/chicagoflf).
-  Used for GTK apps and large text. The zip is checksum-verified against
-  the `ttf-chicagoflf` AUR PKGBUILD.
-- **Chicago Kare** — MIT, from [KingDuane/Chicago-Kare](https://github.com/KingDuane/Chicago-Kare),
-  pinned to a specific commit. A bitmap reproduction, pixel-exact at 12px,
-  used for the bar.
+  Used for the bar, GTK apps and the control panel. The zip is
+  checksum-verified against the `ttf-chicagoflf` AUR PKGBUILD.
+
+Chicago Kare, the bitmap reproduction, is deliberately **not** used. It
+traces the original bitmap, so its outlines are pixel staircases, and it
+ships no hinting tables (`cvt`/`fpgm`/`prep`). It therefore only lands
+cleanly when one font pixel maps to exactly one screen pixel — which never
+happens on a fractionally-scaled display, where a 12px UI font is rendered
+at 15 physical pixels. It looks mushy at every size there. ChicagoFLF is a
+hinted outline design and stays crisp.
 
 Terminals are deliberately left on your existing mono font. Chicago is
 proportional, and `omarchy font set` writes the system `monospace` alias —
 pointing it at Chicago would wreck every terminal.
-
-> Chicago Kare's charset is period-accurate, which means it has no U+2212
-> minus sign and no U+2013 en dash. Keep anything drawn in it to ASCII, or
-> it renders blank.
 
 ## Known limits
 
@@ -148,6 +149,6 @@ drop it too: `omarchy plugin remove <user>.bar` and
 
 ## License
 
-MIT — see [LICENSE](LICENSE). The bundled fonts are not covered by it:
-ChicagoFLF is public domain and Chicago Kare is MIT, and neither is
-redistributed here — `install.sh` fetches both from their upstreams.
+MIT — see [LICENSE](LICENSE). ChicagoFLF is not covered by it and is not
+redistributed here: it is public domain, and `install.sh` fetches it from
+its upstream.
