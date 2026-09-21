@@ -11,6 +11,14 @@ everything, zero animation, and Chicago on the menu bar.
 > appearance that arrived in Mac OS 8 in 1997. That is what this theme
 > targets.
 
+![Platinum on Omarchy: the menu bar, the 50% dither desktop, and the DJIA
+Watcher control panel](docs/screenshot.png)
+
+*The menu bar with its hard black rule, the authentic 1px 50%-dither
+desktop, and the DJIA Watcher control panel drawing its own Platinum title
+bar — Hyprland provides no server-side decorations, so every window chrome
+you see here is painted by the app itself.*
+
 ## Install
 
 ```bash
