@@ -106,19 +106,30 @@ These are Omarchy and Hyprland constraints, not oversights:
   because it owns its window contents.
 - **No global menu bar.** File/Edit/View at the top of the screen needs a
   protocol Wayland does not have.
-- **Menus and popups follow the font selector, not Chicago.** Their font
-  comes from `OMARCHY_MENU_FONT`, which is only settable through `hl.env`.
-  That calls `setenv()` inside Hyprland, so it cannot be *unset* — deleting
-  the line and reloading leaves the old value live for the whole session,
-  and every shell Hyprland spawns inherits it. It *can* be overwritten, and
-  Omarchy treats an empty value as absent, so `install.sh` writes
-  `hl.env("OMARCHY_MENU_FONT", "")` to neutralise it permanently.
+- **The menu/launcher font is a known unresolved issue.** Those surfaces
+  take their font from `OMARCHY_MENU_FONT`, which is only settable through
+  `hl.env`. That calls `setenv()` inside Hyprland, so it cannot be *unset*:
+  deleting the line and reloading leaves the old value live for the rest of
+  the session, and every shell Hyprland spawns inherits it.
 
-  Scoping it per-theme would additionally need a shell restart on every
-  switch, since the value is read once at startup — not worth it for a
-  font. Cloning the menu plugin to sidestep that does **not** work: Omarchy
-  refuses to hand a service-capable API to a third-party plugin while the
-  bar is itself a clone, which breaks the menu's own bar widget.
+  `install.sh` writes `hl.env("OMARCHY_MENU_FONT", "")` on the theory that
+  an empty value reads as absent —
+
+  ```qml
+  return (override && override.length > 0) ? override : fontFamily
+  ```
+
+  — and the variable does verifiably end up empty or absent in the running
+  shell's environment, stable across theme switches and restarts. **Despite
+  that, the menu is still reported as rendering in the wrong font**, so
+  something else is pinning it and the real cause is not yet identified.
+  Treat this as open.
+
+  Two dead ends already ruled out: scoping it per-theme would need a shell
+  restart on every switch, since the value is read once at startup; and
+  cloning the menu plugin does **not** work, because Omarchy refuses to
+  hand a service-capable API to a third-party plugin while the bar is
+  itself a clone, which breaks the menu's own bar widget.
 - **No period cursor.** No classic Mac cursor theme is packaged for Linux.
 
 ## The control panel
@@ -150,6 +161,11 @@ rm -rf ~/.config/omarchy/themes/platinum
 rm -f  ~/.config/omarchy/hooks/theme-set.d/platinum-chrome
 rm -rf ~/.local/share/fonts/chicago && fc-cache -f
 ```
+
+`install.sh` also appends an `hl.env("OMARCHY_MENU_FONT", "")` block to
+`~/.config/hypr/looknfeel.lua`. Delete that block by hand to finish
+uninstalling; leaving it is harmless, since it only hands those surfaces
+back to `omarchy font set`, which is the stock behaviour.
 
 The bar clone is left alone, since you may have other changes in it. To
 drop it too: `omarchy plugin remove <user>.bar` and
