@@ -70,7 +70,11 @@ Two things a theme file cannot reach:
 
 - **The bar font.** A QML property on a cloned bar plugin, not theme
   config. `scripts/patch-bar.py` adds a marker to it, and
-  `hooks/platinum-chrome` rewrites it on every theme change.
+  `hooks/platinum-chrome` rewrites it on every theme change. Saving a
+  plugin file makes the shell reload it, but that reload does *not*
+  re-evaluate the property — the bar keeps the old family until the shell
+  restarts — so the hook restarts it, and only when the family actually
+  changed (i.e. crossing into or out of Platinum, not on every switch).
 - **The GTK font and CSS.** Outside Omarchy's theming entirely.
 
 The bar clone also gains the single hard black rule under the menu bar,

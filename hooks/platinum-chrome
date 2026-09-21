@@ -57,13 +57,19 @@ fi
 # rather than by name. Only rewrite when the value actually differs --
 # plugin dirs hot-reload on save, so an unconditional write would bounce
 # the bar on every theme change.
+# Saving the file makes the shell reload the plugin, but that reload does
+# NOT re-evaluate this property: the bar keeps drawing in the previous
+# family until the shell is restarted outright. So record whether anything
+# actually changed and restart once at the end. Rewriting unconditionally
+# would restart the shell on every theme change, hence the comparison.
+font_changed=0
 shopt -s nullglob
 for qml in "$PLUGINS"/*/Bar.qml; do
   current=$(sed -n 's|^  property string fontFamily: \(.*\)  // PLATINUM-BAR-FONT$|\1|p' "$qml")
   [[ -z $current || $current == "$want_bar" ]] && continue
   tmp=$(mktemp) || continue
   sed "s|^  property string fontFamily: .*  // PLATINUM-BAR-FONT\$|  property string fontFamily: ${want_bar}  // PLATINUM-BAR-FONT|" \
-    "$qml" >"$tmp" && mv "$tmp" "$qml"
+    "$qml" >"$tmp" && mv "$tmp" "$qml" && font_changed=1
 done
 shopt -u nullglob
 
@@ -85,6 +91,14 @@ else
   for d in "$GTK3" "$GTK4"; do
     rm -f "$d/gtk.css"
   done
+fi
+
+# --------------------------------------------------------- apply bar font
+# Only fires when the family actually changed, i.e. only when crossing into
+# or out of Platinum. Backgrounded: theme-set runs its hooks synchronously
+# and would otherwise stall behind the restart.
+if (( font_changed )); then
+  (sleep 1; omarchy restart shell >/dev/null 2>&1) &
 fi
 
 exit 0
