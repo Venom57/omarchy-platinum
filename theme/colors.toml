@@ -1,0 +1,45 @@
+# Platinum -- the appearance Apple built for Copland (1994-96) and shipped
+# in Mac OS 8. Surfaces are the canonical #DDDDDD window grey; chrome is
+# built from a white highlight / dark grey shadow bevel pair.
+#
+# ANSI colors are the 1987 Macintosh II 8-color palette, darkened where the
+# original value was illegible on light grey (yellow and cyan especially).
+# The bright_* set runs closer to the untouched originals.
+
+mode = "light"
+
+accent    = "#3C5A8C"   # Platinum blue chrome
+selection = "#B7C9E2"   # classic Mac highlight fill
+muted     = "#888888"   # bevel shadow
+
+background        = "#DDDDDD"   # Platinum window grey
+dark_background   = "#CCCCCC"   # recessed wells, inactive chrome
+darker_background = "#AAAAAA"   # deep shadow
+lighter_background = "#FFFFFF"  # bevel highlight
+
+foreground        = "#000000"
+dark_foreground   = "#767676"   # dimmed / disabled text
+light_foreground  = "#000000"
+bright_foreground = "#000000"
+
+red     = "#BB0806"
+green   = "#157C0E"
+yellow  = "#8A6D00"
+blue    = "#0000D3"
+cyan    = "#016F96"
+magenta = "#C00669"
+orange  = "#C44C02"
+brown   = "#562F00"
+
+bright_red     = "#DD0907"
+bright_green   = "#1FB714"
+bright_yellow  = "#B08C00"
+bright_blue    = "#2222FF"
+bright_cyan    = "#0288B8"
+bright_magenta = "#F20884"
+
+# Bevel. Platinum lights everything from the top-left: a white highlight
+# edge falling to a dark grey shadow edge. Inactive windows lose the bevel
+# and sit flat, the way a background window did in Mac OS 8.
+hyprland_active_border   = "rgba(ffffffff) rgba(6e6e6eff) 135deg"
+hyprland_inactive_border = "rgba(b4b4b4ff) rgba(b4b4b4ff)"

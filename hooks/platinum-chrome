@@ -1,0 +1,90 @@
+#!/bin/bash
+# theme-set hook: apply the Platinum chrome that cannot live in the theme
+# directory, and undo it for every other theme.
+#
+# Most of Platinum needs no hook at all -- it lives in the theme and is
+# staged and unstaged by `omarchy theme set`:
+#
+#   colors.toml    palette
+#   shell.toml     bar / menu / popup surfaces
+#   hyprland.lua   rounding, borders, gaps, opacity, animations, window
+#                  rules. Loaded as "current theme overrides"; because
+#                  hyprctl reload re-parses from scratch, it simply stops
+#                  applying when another theme is staged.
+#   gtk.css        the GTK override layer, copied into place below
+#
+# Two things a theme file cannot reach are left here: the font family of
+# the cloned bar plugin (a QML property, not theme config), and the GTK
+# font, which sits outside Omarchy's theming entirely.
+#
+# NOT handled, deliberately:
+#
+#   OMARCHY_MENU_FONT -- install.sh pins it to an empty value once, which
+#   Omarchy reads as absent, so menus follow the font selector on every
+#   theme including Platinum. Doing it per-theme would need a shell restart
+#   on each switch (the value is read once at startup), and cloning the
+#   menu plugin to avoid that breaks its bar widget: Omarchy will not hand
+#   a service-capable API to a third-party plugin while the bar is also a
+#   clone.
+#
+# Installed by install.sh, or manually:
+#   omarchy hook install theme-set hooks/platinum-chrome
+
+set -uo pipefail
+
+THEME_SLUG="${1:-}"
+PLUGINS="$HOME/.config/omarchy/plugins"
+THEME_DIR="$HOME/.config/omarchy/themes/platinum"
+GTK3="$HOME/.config/gtk-3.0"
+GTK4="$HOME/.config/gtk-4.0"
+
+BAR_FONT='"Chicago Kare"'   # bitmap cut: the bar is all 12px, where it is exact
+GTK_FONT="ChicagoFLF 12"
+
+# Style.font.family is the fontconfig `monospace` alias that
+# `omarchy font set` writes, so off-theme the font selector takes back over.
+FALLBACK="Style.font.family"
+
+if [[ $THEME_SLUG == "platinum" ]]; then
+  want_bar="$BAR_FONT"; platinum=1
+else
+  want_bar="$FALLBACK"; platinum=0
+fi
+
+# ---------------------------------------------------------------- bar font
+# `omarchy plugin clone` names the clone after the current user, so the
+# directory differs per machine. Find it by the marker install.sh wrote
+# rather than by name. Only rewrite when the value actually differs --
+# plugin dirs hot-reload on save, so an unconditional write would bounce
+# the bar on every theme change.
+shopt -s nullglob
+for qml in "$PLUGINS"/*/Bar.qml; do
+  current=$(sed -n 's|^  property string fontFamily: \(.*\)  // PLATINUM-BAR-FONT$|\1|p' "$qml")
+  [[ -z $current || $current == "$want_bar" ]] && continue
+  tmp=$(mktemp) || continue
+  sed "s|^  property string fontFamily: .*  // PLATINUM-BAR-FONT\$|  property string fontFamily: ${want_bar}  // PLATINUM-BAR-FONT|" \
+    "$qml" >"$tmp" && mv "$tmp" "$qml"
+done
+shopt -u nullglob
+
+# ---------------------------------------------------------------- GTK apps
+mkdir -p "$GTK3" "$GTK4"
+for d in "$GTK3" "$GTK4"; do
+  [[ -f $d/settings.ini ]] || : >"$d/settings.ini"
+  sed -i '/^gtk-font-name=/d' "$d/settings.ini"
+done
+
+if (( platinum )); then
+  gsettings set org.gnome.desktop.interface font-name "$GTK_FONT" 2>/dev/null
+  for d in "$GTK3" "$GTK4"; do
+    printf 'gtk-font-name=%s\n' "$GTK_FONT" >>"$d/settings.ini"
+    [[ -f $THEME_DIR/gtk.css ]] && cp "$THEME_DIR/gtk.css" "$d/gtk.css"
+  done
+else
+  gsettings reset org.gnome.desktop.interface font-name 2>/dev/null
+  for d in "$GTK3" "$GTK4"; do
+    rm -f "$d/gtk.css"
+  done
+fi
+
+exit 0

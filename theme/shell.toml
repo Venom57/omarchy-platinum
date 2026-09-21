@@ -1,0 +1,160 @@
+# Platinum shell surfaces. Literal values -- a theme's shell.toml replaces
+# the generated file outright, so nothing here is templated.
+#
+# Three rules drive every number below:
+#   1. Nothing is translucent. Platinum had no alpha anywhere.
+#   2. Every control is a 1px hard black outline over grey fill.
+#   3. Selection is the classic highlight wash with black text on top,
+#      never colored text.
+
+[bar]
+# The menu bar: 20pt at 72dpi, so 22px here once rounding is accounted for.
+background       = "#DDDDDD"
+background-alpha = 1.0
+text             = "#000000"
+active           = "#BB0806"
+scale-with-font  = true
+size-horizontal  = 22
+size-vertical    = 26
+
+[hyprland]
+active-border            = "#FFFFFF #6E6E6E 135deg"
+active-border-foreground = "#000000"
+
+[controls]
+# The Platinum push button: grey face, hard black outline, no rounding.
+normal-color        = "#000000"
+normal-fill-alpha   = 0.10
+normal-border       = "#000000"
+normal-border-width = 1
+normal-border-alpha = 1.0
+
+# Hover just deepens the face. Platinum had no hover state at all, but
+# with no cursor hinting the bar becomes unreadable, so this is a
+# deliberate, minimal anachronism.
+hover-cursor-color        = "#000000"
+hover-cursor-fill-alpha   = 0.18
+hover-cursor-border       = "#000000"
+hover-cursor-border-width = 1
+hover-cursor-border-alpha = 1.0
+
+focus-color        = "#000000"
+focus-fill-alpha   = 0.18
+focus-border       = "#000000"
+focus-border-width = 2
+focus-border-alpha = 1.0
+
+# Selected = the classic highlight fill, full strength.
+selected-color        = "#3C5A8C"
+selected-fill-alpha   = 1.0
+selected-border       = "#000000"
+selected-border-width = 1
+selected-border-alpha = 1.0
+
+# Pressed inverts, the way a Platinum button did on mouse-down.
+pressed-fill-alpha   = 0.85
+selection-fill-alpha = 1.0
+
+[spacing]
+scale = 1.0
+scale-with-font = true
+# Platinum packed controls tighter than a modern shell does.
+control-padding-x = 8
+control-padding-y = 4
+control-height    = 22
+popup-row-height  = 22
+panel-padding     = 12
+popup-padding     = 10
+row-padding-x     = 10
+
+[font]
+base-size = 12
+
+[popups]
+background       = "#DDDDDD"
+background-alpha = 1.0
+text             = "#000000"
+border           = "hyprland.active-border"
+border-alpha     = 1.0
+border-width     = 2
+
+[tooltip]
+# Balloon help: the one place Platinum used a pale yellow ground.
+background       = "#FFFFCC"
+background-alpha = 1.0
+text             = "#000000"
+border           = "#000000"
+border-alpha     = 1.0
+
+[notifications]
+background       = "#DDDDDD"
+background-alpha = 1.0
+text             = "#000000"
+border           = "hyprland.active-border"
+border-alpha     = 1.0
+border-width     = 2
+countdown        = "#3C5A8C"
+
+[launcher]
+# scrim-alpha 0.0 on purpose: a Mac OS 8 dialog never dimmed what was
+# behind it. Raise it to ~0.4 if the launcher gets hard to read.
+background                = "#DDDDDD"
+background-alpha          = 1.0
+text                      = "#000000"
+border                    = "hyprland.active-border"
+border-alpha              = 1.0
+scrim                     = "#000000"
+scrim-alpha               = 0.0
+selected-background       = "#B7C9E2"
+selected-background-alpha = 1.0
+selected-text             = "#000000"
+selected-border           = "#000000"
+selected-border-alpha     = 1.0
+
+[menu]
+background                = "#DDDDDD"
+background-alpha          = 1.0
+text                      = "#000000"
+border                    = "hyprland.active-border"
+border-alpha              = 1.0
+scrim                     = "#000000"
+scrim-alpha               = 0.0
+selected-background       = "#B7C9E2"
+selected-background-alpha = 1.0
+selected-text             = "#000000"
+selected-border           = "#000000"
+selected-border-alpha     = 1.0
+
+[polkit]
+background       = "#DDDDDD"
+background-alpha = 1.0
+text             = "#000000"
+text-error       = "#BB0806"
+border           = "hyprland.active-border"
+border-error     = "#BB0806"
+border-alpha     = 1.0
+scrim            = "#000000"
+scrim-alpha      = 0.0
+accent           = "#3C5A8C"
+
+[lock]
+background       = "#DDDDDD"
+background-alpha = 1.0
+text             = "#000000"
+placeholder      = "#767676"
+text-error       = "#BB0806"
+border           = "hyprland.active-border"
+border-active    = "hyprland.active-border"
+border-error     = "#BB0806"
+border-alpha     = 1.0
+selection        = "#B7C9E2"
+selection-alpha  = 1.0
+
+[image-picker]
+scrim                   = "#000000"
+scrim-alpha             = 0.35
+text                    = "#000000"
+selected-border         = "#000000"
+selected-border-alpha   = 1.0
+unselected-border       = "#767676"
+unselected-border-alpha = 1.0

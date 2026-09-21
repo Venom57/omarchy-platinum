@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=DJIA Watcher
+Comment=Dow Jones Industrial Average, in a Platinum control panel
+Exec=__PLATINUM_PANELS__/djia.py
+Terminal=false
+Categories=Utility;Office;Finance;
+StartupWMClass=org.platinum.DJIAWatcher
