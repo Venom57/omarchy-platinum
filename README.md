@@ -160,6 +160,17 @@ that library must load before `libwayland-client` or it silently produces an
 ordinary window, so `control-panels.py` re-executes itself with `LD_PRELOAD`
 set rather than relying on every launcher to remember.
 
+**It follows your theme.** The shapes are always Platinum — bevels,
+pinstripes, notched group boxes — but the colours and font come from the
+active Omarchy theme. On Platinum it uses the exact hand-tuned palette and
+ChicagoFLF; on any other theme it derives every role from that theme's
+`colors.toml` (surfaces from `background`, meters from `accent`, up/down
+from `green`/`red`, bevels and outlines computed per `mode` so they stay
+visible on dark themes) and uses the same font as your bar. It checks every
+two seconds and re-skins in place when you switch themes or fonts — no
+restart. Theme switches are polled rather than watched, because `theme-set`
+replaces the staged theme directory wholesale and orphans any inotify watch.
+
 Everything is drawn with Cairo rather than GTK widgets, because Platinum
 lives in details no widget theme exposes — pinstripes, two-tone bevels,
 group boxes that notch their own border for the label.
