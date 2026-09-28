@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Control Panels
+Comment=Desktop-pinned Platinum control panels: date & time, the Dow, memory, sound
+Exec=__PLATINUM_PANELS__/control-panels.py
+Terminal=false
+Categories=Utility;System;

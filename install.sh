@@ -140,12 +140,23 @@ say "Installing the theme-set hook"
 omarchy hook install theme-set "$SRC/hooks/platinum-chrome" >/dev/null
 
 # ----------------------------------------------------------------- panels
+# The control panels are a desktop-pinned layer-shell surface, so they need
+# gtk4-layer-shell; control-panels.py LD_PRELOADs it itself. The standalone
+# DJIA window is kept alongside for anyone who wants it as a normal window.
 if (( WITH_PANELS )); then
-  say "Installing the DJIA Watcher control panel"
-  install -Dm755 "$SRC/panels/djia.py" "$HOME/.local/share/platinum-panels/djia.py"
-  mkdir -p "$HOME/.local/share/applications"
-  sed "s|^Exec=.*|Exec=$HOME/.local/share/platinum-panels/djia.py|" \
-    "$SRC/panels/djia-watcher.desktop" > "$HOME/.local/share/applications/djia-watcher.desktop"
+  say "Installing the control panels"
+  if ! pacman -Q gtk4-layer-shell >/dev/null 2>&1; then
+    warn "gtk4-layer-shell is not installed; the container needs it."
+    warn "  omarchy pkg add gtk4-layer-shell"
+  fi
+  PANELS_DIR="$HOME/.local/share/platinum-panels"
+  mkdir -p "$PANELS_DIR" "$HOME/.local/share/applications"
+  install -m644 "$SRC/panels/platinum.py" "$SRC/panels/modules.py" "$PANELS_DIR/"
+  install -m755 "$SRC/panels/control-panels.py" "$SRC/panels/djia.py" "$PANELS_DIR/"
+  for entry in control-panels djia-watcher; do
+    sed "s|__PLATINUM_PANELS__|$PANELS_DIR|" "$SRC/panels/$entry.desktop" \
+      > "$HOME/.local/share/applications/$entry.desktop"
+  done
   update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
 fi
 

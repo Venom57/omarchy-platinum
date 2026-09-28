@@ -136,26 +136,46 @@ These are Omarchy and Hyprland constraints, not oversights:
   itself a clone, which breaks the menu's own bar widget.
 - **No period cursor.** No classic Mac cursor theme is packaged for Linux.
 
-## The control panel
+## Control panels
 
-`panels/djia.py` is a Mac OS 8 control panel that watches the Dow Jones
-Industrial Average — live price, session high/low, 52-week range, and an
-intraday sparkline with the previous close as a dashed baseline.
+`./install.sh --with-panels` installs **Control Panels**: a stack of Mac OS 8
+style panels in one Platinum frame, pinned to the desktop.
 
-Every pixel is drawn with Cairo rather than assembled from GTK widgets,
-because Platinum lives in details no widget theme exposes: pinstripes,
-two-tone bevels, group boxes that notch their own border for the label.
-That is also why it has a working title bar and close box.
+| Module | Shows |
+|---|---|
+| Date & Time | clock, date, time zone, and whether NTP has the clock in hand |
+| Dow Jones Industrial Average | live price, change, intraday sparkline against the previous close, refresh interval |
+| Memory | RAM and swap in use, plus the three heaviest processes |
+| Sound | default output, volume with − / + buttons, mute |
 
-Data comes from Yahoo Finance's chart endpoint, which needs no API key but
-is undocumented and can change without notice; the panel reports errors in
-place rather than dying.
+**It is not a window.** It is a `gtk4-layer-shell` surface on the `BOTTOM`
+layer — above the wallpaper, below every normal window — so it sits on the
+desktop the way a desk accessory did instead of joining Hyprland's tiling
+layout. It takes no keyboard focus and reserves no screen space, so it never
+steals input or shoves windows aside; the pointer still reaches it, so the
+controls work.
 
-Install with `./install.sh --with-panels`, then launch **DJIA Watcher**
-from your app launcher. Ctrl-W or the close box quits, Ctrl-R refreshes.
+Requires `gtk4-layer-shell` (`omarchy pkg add gtk4-layer-shell`). From Python
+that library must load before `libwayland-client` or it silently produces an
+ordinary window, so `control-panels.py` re-executes itself with `LD_PRELOAD`
+set rather than relying on every launcher to remember.
 
-The drawing helpers (`bevel`, `group_box`, `title_bar`, radio, button) are
-generic, so further panels are mostly new content against the same chrome.
+Everything is drawn with Cairo rather than GTK widgets, because Platinum
+lives in details no widget theme exposes — pinstripes, two-tone bevels,
+group boxes that notch their own border for the label.
+
+- `panels/platinum.py` — the drawing kit and the layer-shell container
+- `panels/modules.py` — the modules; each is a small class with `refresh()`
+  (worker thread) and `draw()` (main loop)
+- `panels/control-panels.py` — edit `MODULES` to choose and order them, and
+  the `anchors`/`margins` arguments to move the stack
+
+`panels/djia.py` is the original standalone DJIA panel as an ordinary
+floating window, kept for anyone who prefers it.
+
+Market data comes from Yahoo Finance's chart endpoint: no API key, but
+undocumented, so it can change without notice. Failures show in place
+rather than taking the container down.
 
 ## Uninstall
 
